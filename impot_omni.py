@@ -7,21 +7,8 @@ from datetime import datetime, timedelta
 import locale
 import os
 import hashlib
-# from dateutil import parser
 import pytz
 
-# options = webdriver.ChromeOptions()
-# options.add_argument("--start-maximized")
-# driver = webdriver.Chrome(options=options)
-
-# driver.get("https://cmaisonneuve.omnivox.ca/")
-
-#input("🔐 Connecte-toi manuellement, puis appuie sur Entrée ici une fois rendu sur la page des cours...")
-
-# debut de code ajouter
-# ⚠️ Remplace par tes vraies infos (ou demande à les saisir)
-# identifiant = "*******" #input ("TON_CODE_PERMANENT")
-# mot_de_passe = "********" #input ("TON_MDP") 
 
 # Lance le navigateur
 options = webdriver.ChromeOptions()
@@ -31,14 +18,8 @@ driver = webdriver.Chrome(options=options)
 # Étape 1 : Aller sur la page de connexion
 driver.get("https://cmaisonneuve.omnivox.ca/")
 
-# # Étape 2 : Remplir le formulaire de connexion
-# time.sleep(2)  # Laisse le temps à la page de charger
-# champ_identifiant = driver.find_element(By.ID, "Identifiant")
-# champ_identifiant.send_keys(identifiant)
+# # Étape 2 : Remplir le formulaire de connexion (manuellement)
 
-# champ_mdp = driver.find_element(By.ID, "CodeAcces")
-# champ_mdp.send_keys(mot_de_passe)
-# champ_mdp.send_keys(Keys.RETURN)
 time.sleep(5)
 input("🔐 Connecte-toi manuellement dans le navigateur, puis appuie sur Entrée ici une fois rendu sur la page des cours...")
 

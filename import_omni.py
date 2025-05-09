@@ -8,6 +8,11 @@ import os
 import hashlib
 import pytz
 
+# Creation du hash basée sur date + heure + nom 
+def generer_hash(cours):
+    print("Création d'une signature unique")
+    base = f"{cours['nom']}-{cours['date']}-{cours['heure_debut']}"
+    return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 # Lance le navigateur
 options = webdriver.ChromeOptions()
@@ -66,13 +71,26 @@ for c in liste_cours:
     print(c)
 
 input("Appuie sur Entrée pour continuer...")
-# debut de creation de fichier dèimportation
+# debut de creation de fichier d'importation
+
+# 📁 Chargement de l'historique
+fichier_historique = "importes.txt"
+evenements_importes = set()
+
+if os.path.exists(fichier_historique):
+    with open(fichier_historique, "r", encoding="utf-8") as f:
+        evenements_importes = set(f.read().splitlines())
+
+
+
 
 # Pour que strptime comprenne les mois français
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')  # ou 'fr_FR' sous Windows
 
 print("🔄 Chargement...")
 cal = Calendar()
+nouveaux_hashes = []
+cours_deletes = []
 local_tz = pytz.timezone("America/Toronto")
 for cours in liste_cours:
     # Reconstituer la date en ajoutant l'année manuellement
@@ -102,46 +120,32 @@ for cours in liste_cours:
     end_datetime_utc = end_datetime.astimezone(pytz.utc)
 
     # Créer l'événement
+    hash_evt = generer_hash(cours)
     e = Event()
     e.name = cours["nom"]
     e.begin = start_datetime_utc
     e.end = end_datetime_utc
-    e.description = f"{cours['no_et_groupe']}\nProfesseur: {cours['prof']}\nMode: {cours['mode']}"
+    e.description = f"{cours['no_et_groupe']}\nProfesseur: {cours['prof']}\nMode: {cours['mode']}\nCodeRegisteImport: {hash_evt}"
+    
+
+    if hash_evt in evenements_importes:
+        print(f"⏩ Cours déjà importé : {cours['nom']} le {cours['date']} à {cours['heure_debut']}")
+        cours_deletes.append(cours)
+        liste_cours.remove(cours)
+        continue  # on passe au suivant
+    # Ajouter à la liste et au calendrier
+    nouveaux_hashes.append(hash_evt)
 
     cal.events.add(e)
+print("Les cours suivants ne seront pas importés :")
+for cours in cours_deletes:
+    print(f"⏩ Cours déjà importé : {cours['nom']} le {cours['date']} à {cours['heure_debut']}")
+input("Appuie sur Entrée pour continuer...")    
 print("🔄 Chargement...")
 #Enregistrer dans un fichier .ics
 chemin_fichier = os.path.expanduser("~/Documents/horaire_omnivox.ics")
 with open(chemin_fichier, "w", encoding="utf-8") as f:
     f.write(str(cal))
-
-# 📁 Chargement de l'historique
-fichier_historique = "importes.txt"
-evenements_importes = set()
-
-if os.path.exists(fichier_historique):
-    with open(fichier_historique, "r", encoding="utf-8") as f:
-        evenements_importes = set(f.read().splitlines())
-
-def generer_hash(cours):
-    """Crée une signature unique basée sur date + heure + nom"""
-    base = f"{cours['nom']}-{cours['date']}-{cours['heure_debut']}"
-    return hashlib.sha256(base.encode("utf-8")).hexdigest()
-
-# ⚙️ Traitement avec vérification
-nouveaux_hashes = []
-for cours in liste_cours:
-    hash_evt = generer_hash(cours)
-
-    if hash_evt in evenements_importes:
-        print(f"⏩ Cours déjà importé : {cours['nom']} le {cours['date']} à {cours['heure_debut']}")
-        continue  # on passe au suivant
-
-    # Génération de l'événement (comme dans l'exemple précédent)
-    # ...
-    # Ajouter à la liste et au calendrier
-    nouveaux_hashes.append(hash_evt)
-    cal.events.add(e)
 
 # 🔐 Sauvegarder l'historique mis à jour
 with open(fichier_historique, "a", encoding="utf-8") as f:
@@ -149,3 +153,5 @@ with open(fichier_historique, "a", encoding="utf-8") as f:
         f.write(h + "\n")
 
 print("✅ Fichier horaire_omnivox.ics généré avec succès. Vous pouvez trouver le fichier dans le dossier Documents.")
+
+

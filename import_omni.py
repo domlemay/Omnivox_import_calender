@@ -120,12 +120,13 @@ for cours in liste_cours:
     end_datetime_utc = end_datetime.astimezone(pytz.utc)
 
     # Créer l'événement
+    hash_evt = generer_hash(cours)
     e = Event()
     e.name = cours["nom"]
     e.begin = start_datetime_utc
     e.end = end_datetime_utc
-    e.description = f"{cours['no_et_groupe']}\nProfesseur: {cours['prof']}\nMode: {cours['mode']}"
-    hash_evt = generer_hash(cours)
+    e.description = f"{cours['no_et_groupe']}\nProfesseur: {cours['prof']}\nMode: {cours['mode']}\nCodeRegisteImport: {hash_evt}"
+    
 
     if hash_evt in evenements_importes:
         print(f"⏩ Cours déjà importé : {cours['nom']} le {cours['date']} à {cours['heure_debut']}")
